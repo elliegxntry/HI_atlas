@@ -20,11 +20,9 @@ void dEdx_protonfit_plot() {
     gPad->SetTicks();
     gPad->SetLogy(1);
     
-    //create Latex object
     TLatex *latex = new TLatex();
     latex->SetNDC(kTRUE);
 
-    //get histograms from the root file you output in analysis macro
     TFile *file = new TFile("root_files/fit.root","read");
     TH1D* myhist[nbins_number*pbins_number];
     TH1D* kaonData[nbins_number*pbins_number];

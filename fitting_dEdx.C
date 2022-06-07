@@ -89,35 +89,35 @@ void fitting_dEdx() {
         // ///////////////////////////////////Fitting ///////////////////////////////////
         // Fit parameters: (N, mean, Sigma, AlphaL, nL, AlphaH, nH) - defined in dscb function
     // set the parameters of the fit - aka first guesses!
-    const float pionN = 950000;
+    const float pionN = 770000;
     const float pionMean = -0.19;
     const float pionSigma = 0.18;
     const float pionAlphaL = 1.2;
-    const float pionnL = 1000000;
+    const float pionnL = 100000;
     const float pionAlphaH = 1.1;
-    const float pionnH = 1000000;
+    const float pionnH = 10000;
     const float pionLowLim = -0.7;
     const float pionUpLim = 0.4;
     
     //Set the parameters of the fit - initial guesses
-    const float kaonN = 20000;
+    const float kaonN = 32000;
     const float kaonMean = 0.7;
     const float kaonSigma = 0.18;
-    const float kaonAlphaL = 1.5;
-    const float kaonnL = 8.6;
-    const float kaonAlphaH = 0.78;
+    const float kaonAlphaL = 1.8;
+    const float kaonnL = 10;
+    const float kaonAlphaH = 0.8;
     const float kaonnH = 1000000;
     const float kaonLowLim = pionUpLim;
     const float kaonUpLim = 1.15;
     
     //Set the parameters of the fit - initial guesses:
-    const float protonN = 16000;
+    const float protonN = 14000;
     const float protonMean = 1.5;
     const float protonSigma = .17;
-    const float protonAlphaL = 6.9;
-    const float protonnL = -7;
+    const float protonAlphaL = 20;
+    const float protonnL = 950;
     const float protonAlphaH = 1.2;
-    const float protonnH = 348000;
+    const float protonnH = 359000;
     const float protonLowLim = kaonUpLim;
     const float protonUpLim = 2.1;
     
@@ -141,8 +141,10 @@ void fitting_dEdx() {
         pionFit[n] = new TF1(pionFitName.str().c_str(), dscb, pionLowLim, pionUpLim,7.);
         pionFit_fullrange[n] = new TF1("pion_n0p0_fullrange", dscb, -1,4,7.);
         pionFit[n]->SetParameters(pionN, pionMean, pionSigma, pionAlphaL, pionnL, pionAlphaH, pionnH);
+        pionFit[n]->SetParLimits(4,0,10000000);
+        pionFit[n]->SetParLimits(6,0,10000000);
 
-        distributions[n]->Fit(pionFit[n],"RNLQ");
+        //distributions[n]->Fit(pionFit[n],"RNLQ");
         distributions[n]->Fit(pionFit[n],"RNLQ");
         distributions[n]->Fit(pionFit[n],"RNLQ");
         distributions[n]->Fit(pionFit[n],"RNL");
@@ -157,7 +159,9 @@ void fitting_dEdx() {
         kaonFit[n] = new TF1(kaonFitName.str().c_str(), dscb, kaonLowLim,kaonUpLim,7.);
         kaonFit_fullrange[n] = new TF1("kaon_n0p0_fullrange", dscb, -1,4,7.);
         kaonFit[n]->SetParameters(kaonN, kaonMean, kaonSigma, kaonAlphaL, kaonnL, kaonAlphaH, kaonnH);
-        kaonFit[n]->SetParLimits(4,-40000,-30000);
+        kaonFit[n]->SetParLimits(4,0,100000000000);
+        kaonFit[n]->SetParLimits(5,0,1);
+        //kaonFit[n]->SetParLimits(6,0,9000000);
         
         //subtract pion fit from the histogram:
         ostringstream kDataName;
@@ -170,9 +174,9 @@ void fitting_dEdx() {
             double difference = hist - fit;
             kData[n]->SetBinContent(i,difference);
         }
-        kData[n]->Fit(kaonFit[n],"RNLQ");
-        kData[n]->Fit(kaonFit[n],"RNLQ");
-        kData[n]->Fit(kaonFit[n],"RNLQ");
+        //kData[n]->Fit(kaonFit[n],"RNLQ");
+        //kData[n]->Fit(kaonFit[n],"RNLQ");
+        //kData[n]->Fit(kaonFit[n],"RNLQ");
         kData[n]->Fit(kaonFit[n],"RNL");
         
         kaonFit_fullrange[n]->SetParameters(kaonFit[n]->GetParameter(0),kaonFit[n]->GetParameter(01),kaonFit[n]->GetParameter(02),kaonFit[n]->GetParameter(03),kaonFit[n]->GetParameter(04),kaonFit[n]->GetParameter(05),kaonFit[n]->GetParameter(06));
@@ -186,8 +190,9 @@ void fitting_dEdx() {
         protonFit[n] = new TF1(protonFitName.str().c_str(), dscb, protonLowLim, protonUpLim, 7);
 
         protonFit[n]->SetParameters(protonN, protonMean, protonSigma, protonAlphaL, protonnL, protonAlphaH, protonnH);
-        protonFit[n]->SetParLimits(3,-10,10);
-        protonFit[n]->SetParLimits(4,-80000, 0);
+        protonFit[n]->SetParLimits(3,0,1000);
+        protonFit[n]->SetParLimits(4,0,1000);
+        protonFit[n]->SetParLimits(6,0,10000000);
         
         //subtract kaon and pion fit from histogram:
         ostringstream pDataName;
@@ -201,8 +206,8 @@ void fitting_dEdx() {
             
             protonData[n]->SetBinContent(i,difference);
         }
-        protonData[n]->Fit(protonFit[n],"RNLQ");
-        protonData[n]->Fit(protonFit[n],"RNLQ");
+        //protonData[n]->Fit(protonFit[n],"RNLQ");
+        //protonData[n]->Fit(protonFit[n],"RNLQ");
         protonData[n]->Fit(protonFit[n],"RNLQ");
         protonData[n]->Fit(protonFit[n],"RNL");
         

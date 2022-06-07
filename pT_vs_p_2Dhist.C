@@ -2,6 +2,7 @@
 #include "TStyle.h"
 #include "TLegend.h"
 #include "TLatex.h"
+#include "TLegend.h"
 #include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -52,14 +53,23 @@ void pT_vs_p_2Dhist() {
         }
     }
     for (int eta = 0; eta < eta_bin_num; eta++) {
+        TLegend *legend = new TLegend(0.68,0.3,0.85,0.35);
         pTp_hist[eta]->Draw("colz");
-        latex->DrawLatex(0.5,0.35,"#scale[0.8]{ATLAS #bf{Internal}}");   //Always include "ATLAS INTERNAL" on your plots
-        latex->DrawLatex(0.5,0.30,"#scale[0.6]{#bf{0nXn 5.02 TeV Pb+Pb}}");
+        latex->DrawLatex(0.68,0.50,"#scale[0.8]{ATLAS #bf{Internal}}");   //Always include "ATLAS INTERNAL" on your plots
+        latex->DrawLatex(0.68,0.45,"#scale[0.6]{#bf{0nXn 5.02 TeV Pb+Pb}}");
         ostringstream eta_label;
         eta_label << "#scale[0.6]{#bf{" << eta_bins[eta] << " < #eta < " << eta_bins[eta+1] << "}}";
-        latex->DrawLatex(0.5, 0.25,eta_label.str().c_str());
+        latex->DrawLatex(0.68, 0.40,eta_label.str().c_str());
         ostringstream histName;
-        histName << "pTp_hist" << "_eta" << eta << ".pdf";
+        histName << "pT_vs_p_plots/pTp_hist" << "_eta" << eta << ".pdf";
+        TF1 *yx;
+        yx = new TF1("yx","x",0,50);
+        yx->SetLineWidth(2);
+        yx->SetLineColor(kBlue);
+        yx->SetLineStyle(3);
+        legend->AddEntry(yx, "pT = p","l");
+        yx->Draw("same");
+        legend->Draw("same");
         tc->SaveAs(histName.str().c_str());
     }
 }
