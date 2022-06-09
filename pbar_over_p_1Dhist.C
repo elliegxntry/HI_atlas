@@ -29,7 +29,7 @@ void pbar_over_p_1Dhist() {
     
     //create eta binning
     const int eta_bin_num = 1;
-    double eta_bins[eta_bin_num+1] = {-2.5,2.5};
+    double eta_bins[eta_bin_num+1] = {-0.8,0.8};
     TH1D* histogram[eta_bin_num];
     
     //create a histogram for each bin

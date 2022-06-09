@@ -1,6 +1,3 @@
-
-//ROOT header files
-
 #include "TCanvas.h"  //allows you to create "canvases" to "draw" histograms on
 #include "TStyle.h"   //allows you to customize style settings
 #include "TLegend.h"  //allows you to make legends
@@ -23,7 +20,7 @@ void dEdx_protonfit_plot() {
     TLatex *latex = new TLatex();
     latex->SetNDC(kTRUE);
 
-    TFile *file = new TFile("root_files/fit.root","read");
+    TFile *file = new TFile("root_files/proton_fit.root","read");
     TH1D* myhist[nbins_number*pbins_number];
     TH1D* kaonData[nbins_number*pbins_number];
     TH1D* protonData[nbins_number*pbins_number];
@@ -124,7 +121,7 @@ void dEdx_protonfit_plot() {
         protonFit[n]->Draw("same");
         
         // build the legend
-        TLegend *legend = new TLegend(0.6,0.7,0.9,0.9);
+        TLegend *legend = new TLegend(0.7,0.7,0.9,0.9);
         gStyle->SetLegendBorderSize(1);
         legend->AddEntry(myhist[n], "Data","l");
         legend->AddEntry(kaonData[n], "Pion subtracted data", "l");
@@ -141,6 +138,6 @@ void dEdx_protonfit_plot() {
         latex->DrawLatex(0.7,0.65,"#scale[0.8]{ATLAS #bf{Internal}}");
         latex->DrawLatex(0.7,0.60,"#scale[0.6]{#bf{0nXn 5.02 TeV Pb+Pb}}");
         latex->DrawLatex(0.7,0.55,"#scale[0.6]{#bf{0.3 < p < 0.4}}");
-        tc->SaveAs(Form("dEdx_histograms/n%d_p0.pdf",n));
+        tc->SaveAs(Form("dEdx_histograms/antiproton_n%d_p0.pdf",n));
     }
 }
