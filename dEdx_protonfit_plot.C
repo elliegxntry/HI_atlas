@@ -20,7 +20,7 @@ void dEdx_protonfit_plot() {
     TLatex *latex = new TLatex();
     latex->SetNDC(kTRUE);
 
-    TFile *file = new TFile("root_files/proton_fit.root","read");
+    TFile *file = new TFile("root_files/antiproton_fit.root","read");
     TH1D* myhist[nbins_number*pbins_number];
     TH1D* kaonData[nbins_number*pbins_number];
     TH1D* protonData[nbins_number*pbins_number];

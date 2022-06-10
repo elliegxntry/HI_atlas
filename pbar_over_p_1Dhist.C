@@ -7,45 +7,46 @@
 #include "TLegend.h"
 #include "TLatex.h"
 #include "TH2D.h"
+#include "TGraph.h"
 
 void pbar_over_p_1Dhist() {
-    //load in the data
-    TFile *file = new TFile("root_files/slimmed_user.srdas.29054111.OUTPUT._0.root","READ");
-    TTree *tree = (TTree*) file->Get("tree");
-    
-    //set addresses to tree variables and initialize arrays to store them
-    int trk_n;
-    tree->SetBranchAddress("trk_n",&trk_n);
-    float trk_pt[10000];
-    tree->SetBranchAddress("trk_pt",trk_pt);
-    float trk_eta[10000];
-    tree->SetBranchAddress("trk_eta",trk_eta);
-    float trk_q[10000];
-    tree->SetBranchAddress("trk_q",trk_q);
-    
-    //create arrays for the proton and anti proton data
-    float proton[10000];
-    float proton_bar[10000];
-    
     //create eta binning
-    const int eta_bin_num = 1;
-    double eta_bins[eta_bin_num+1] = {-0.8,0.8};
-    TH1D* histogram[eta_bin_num];
+    const int etabin_num = 1;
+    double etabins[etabin_num+1] = {-0.8,0.8};
+    const int pbin_num = 1;
+    double pbins[pbin_num+1] = {0.3,0.4};
     
-    //create a histogram for each bin
-    for (int eta = 0; eta < eta_bin_num; eta++){
-        ostringstream histName;
-        histName << "pbar_over_p_vs_pt_eta" << eta;
-        histogram[eta] = new TH1D(histName.str().c_str(),"#frac{#bar{p}}{p} vs pT;pT [GeV/c];#frac{#bar{p}}{p}",100,-1,3);
-        histogram[eta]->Sumw2();
+    //create canvas and customize
+    auto graph = new TGraph();
+    gStyle->SetOptStat(0);
+    //gPad->SetTicks();
+    //gPad->SetLogy(1);
+    TLatex *latex = new TLatex();
+    latex->SetNDC(kTRUE);
+
+    TFile *proton_file = new TFile("root_files/proton_fit.root","read");
+    TFile *antiproton_file = new TFile("root_files/antiproton_fit.root","read");
+    
+    TH1I* protons[etabin_num*pbin_num];
+    TH1I* antiprotons[etabin_num*pbin_num];
+    
+    //int plotCount = 0;
+    
+    for (int p = 0; p < 1; p++) {
+        /*
+        protons[p] = (TH1I*) proton_file->Get("totalProtons");
+        int proton_num;
+        proton_num = protons[p];
+        antiprotons[p] = (TH1I*) antiproton_file->Get("totalAntiProtons");
+        int antiproton_num;
+        antiproton_num = antiprotons[p];
+        int pbar_p;
+        pbar_p = antiproton_num/proton_num;*/
+        graph->SetPoint(0.,1.,1.);
+        graph->SetMarkerColor(kBlue);
+        graph->SetMarkerStyle(kFullCircle);
+        //tc->Add(graph);
+        graph->Draw();
+        //tc->SaveAs("pbar_p_test_plot.pdf");
     }
-    
-    std::cout << "Reading the file!" << std::endl;
-    
-    //get each entry
-    for (int entry = 0; entry < tree->GetEntries(); entry++) {
-        tree->GetEntry(entry);
-    }
-    file->Close();
-    
 }

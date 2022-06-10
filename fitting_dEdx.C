@@ -2,6 +2,7 @@
 #include "TTree.h"
 #include "TH1D.h"
 #include "TF1.h"
+#include "TH1I.h"
 
 double dscb(double* x, double*par) {
     //this names the parameters of the fit funtion
@@ -71,11 +72,12 @@ void fitting_dEdx() {
     tree->SetBranchAddress("trk_dEdx", dEdx);
         
     for (int e = 0; e < tree->GetEntries(); e++) {
+        if (e % 100000 == 0) std::cout << "Loading event " << e << std::endl;
         tree->GetEntry(e);
         for (int i=0; i < trk_n; i++){
             if (abs(trk_eta[i]) > 0.8) {continue;}
             double momentum = abs(trk_pt[i]*cosh(trk_eta[i]));
-            if (trk_q[i] < 0) {continue;}
+            if (trk_q[i] > 0) {continue;}
             for (int n = 0; n < nbins_num; n++) {
                 if (nbins[n] < trk_400 && trk_400 <= nbins[n+1] && pbins[0] <= momentum && momentum < pbins[1]) {
                     distributions[n]->Fill(log(dEdx[i]));
@@ -87,8 +89,8 @@ void fitting_dEdx() {
     for (int n = 0; n < nbins_num; n++) {
         distributions[n]->Scale(1,"width");
     }
-    TFile *outfile = new TFile("root_files/proton_fit.root","recreate");
-    //gSystem->RedirectOutput("UPCFitStatus.txt","w");
+    TFile *outfile = new TFile("root_files/antiproton_fit.root","recreate");
+    gSystem->RedirectOutput("antiproton_UPCFitStatus.txt","w");
         
         // ///////////////////////////////////Fitting ///////////////////////////////////
         // Fit parameters: (N, mean, Sigma, AlphaL, nL, AlphaH, nH) - defined in dscb function
@@ -104,11 +106,11 @@ void fitting_dEdx() {
     const float pionUpLim = 0.35;
     
     //Set the parameters of the fit - initial guesses
-    const float kaonN = 32000;
-    const float kaonMean = 0.7;
-    const float kaonSigma = 0.18;
-    const float kaonAlphaL = 1.2;
-    const float kaonnL = 1.5;
+    const float kaonN = 18000;
+    const float kaonMean = 0.688;
+    const float kaonSigma = 0.16;
+    const float kaonAlphaL = 1.5;
+    const float kaonnL = 100000;
     const float kaonAlphaH = 1.1;
     const float kaonnH = 1000000;
     const float kaonLowLim = pionUpLim;
@@ -119,7 +121,7 @@ void fitting_dEdx() {
     const float protonMean = 1.5;
     const float protonSigma = .17;
     const float protonAlphaL = 1.2;
-    const float protonnL = 10;
+    const float protonnL = 1.4;
     const float protonAlphaH = 1.2;
     const float protonnH = 1000000;
     const float protonLowLim = kaonUpLim;
@@ -136,7 +138,7 @@ void fitting_dEdx() {
     //initialize the histograms
     TH1D *kData[nbins_num*pbins_num];
     TH1D *protonData[nbins_num*pbins_num];
-    TH1D * totalProtons = new TH1D("totalProtons","Proton count;N_{ch};p{+/-}",100,-1,4);
+    TH1I * totalProtons = new TH1I("totalAntiProtons","Proton count;N_{ch};p{+/-}",100,-1,4);
 
     for (int n = 0; n < nbins_num; n++) {
         
@@ -147,10 +149,11 @@ void fitting_dEdx() {
         pionFit[n] = new TF1(pionFitName.str().c_str(), dscb, pionLowLim, pionUpLim,7.);
         pionFit_fullrange[n] = new TF1("pion_n0p0_fullrange", dscb, -1,4,7.);
         pionFit[n]->SetParameters(pionN, pionMean, pionSigma, pionAlphaL, pionnL, pionAlphaH, pionnH);
+        //pionFit[n]->SetParLimits(3,0,5);
         //pionFit[n]->SetParLimits(4,10000,10000000);
         //pionFit[n]->SetParLimits(6,10000,10000000);
 
-        //distributions[n]->Fit(pionFit[n],"RNLQ");
+        distributions[n]->Fit(pionFit[n],"RNLQ");
         distributions[n]->Fit(pionFit[n],"RNLQ");
         distributions[n]->Fit(pionFit[n],"RNLQ");
         distributions[n]->Fit(pionFit[n],"RNL");
@@ -165,9 +168,9 @@ void fitting_dEdx() {
         kaonFit[n] = new TF1(kaonFitName.str().c_str(), dscb, kaonLowLim,kaonUpLim,7.);
         kaonFit_fullrange[n] = new TF1("kaon_n0p0_fullrange", dscb, -1,4,7.);
         kaonFit[n]->SetParameters(kaonN, kaonMean, kaonSigma, kaonAlphaL, kaonnL, kaonAlphaH, kaonnH);
-        kaonFit[n]->SetParLimits(4,0,100);
-        kaonFit[n]->SetParLimits(5,0,5);
-        kaonFit[n]->SetParLimits(6,100000,10000000);
+        //kaonFit[n]->SetParLimits(4,0,100000000);
+        //kaonFit[n]->SetParLimits(5,0,5);
+        //kaonFit[n]->SetParLimits(6,100000,10000000);
         
         //subtract pion fit from the histogram:
         ostringstream kDataName;
@@ -181,8 +184,8 @@ void fitting_dEdx() {
             kData[n]->SetBinContent(i,difference);
         }
         //kData[n]->Fit(kaonFit[n],"RNLQ");
-        //kData[n]->Fit(kaonFit[n],"RNLQ");
-        //kData[n]->Fit(kaonFit[n],"RNLQ");
+        kData[n]->Fit(kaonFit[n],"RNLQ");
+        kData[n]->Fit(kaonFit[n],"RNLQ");
         kData[n]->Fit(kaonFit[n],"RNL");
         
         kaonFit_fullrange[n]->SetParameters(kaonFit[n]->GetParameter(0),kaonFit[n]->GetParameter(01),kaonFit[n]->GetParameter(02),kaonFit[n]->GetParameter(03),kaonFit[n]->GetParameter(04),kaonFit[n]->GetParameter(05),kaonFit[n]->GetParameter(06));
@@ -196,9 +199,9 @@ void fitting_dEdx() {
         protonFit[n] = new TF1(protonFitName.str().c_str(), dscb, protonLowLim, protonUpLim, 7);
 
         protonFit[n]->SetParameters(protonN, protonMean, protonSigma, protonAlphaL, protonnL, protonAlphaH, protonnH);
-        protonFit[n]->SetParLimits(3,0,100);
-        protonFit[n]->SetParLimits(4,0,100);
-        protonFit[n]->SetParLimits(6,100000,10000000);
+        //protonFit[n]->SetParLimits(3,0,100);
+        //protonFit[n]->SetParLimits(4,0,100);
+        //protonFit[n]->SetParLimits(6,100000,10000000);
         
         //subtract kaon and pion fit from histogram:
         ostringstream pDataName;
@@ -219,7 +222,7 @@ void fitting_dEdx() {
         
         protonFit_fullrange[n]->SetParameters(protonFit[n]->GetParameter(0),protonFit[n]->GetParameter(01),protonFit[n]->GetParameter(02),protonFit[n]->GetParameter(03),protonFit[n]->GetParameter(04),protonFit[n]->GetParameter(05),protonFit[n]->GetParameter(06));
         int integral = abs(protonFit_fullrange[n]->Integral(-0.5,0)) + protonFit_fullrange[n]->Integral(0,4);
-        std::cout << "Number of protons: " << integral << std::endl;
+        std::cout << "Number of antiprotons: " << integral << std::endl;
         totalProtons->SetBinContent(n+1,integral);
 
         std::cout  << "Chi^2: " << protonFit[n]->GetChisquare() << "\n" << "NDF: " << protonFit[n]->GetNDF() << "\n" << "Chi^2/NDF: " << protonFit[n]->GetChisquare() / protonFit[n]->GetNDF()  << "\n" << std::endl;
