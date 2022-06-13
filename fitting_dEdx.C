@@ -1,4 +1,4 @@
-#include "TFile.h"
+d#include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
 #include "TF1.h"
@@ -39,7 +39,7 @@ void fitting_dEdx() {
     const int pbins_num = 1;
     //double nbins[nbins_num+1] = {25,30,35,40,45,50,55,60};
     double nbins[nbins_num+1] = {25,60};
-    double pbins[pbins_num+1] = {0.3,0.4};
+    double pbins[pbins_num+1] = {0.38,0.4};
     TH1D* distributions[nbins_num*pbins_num];
     
     for (int n = 0; n < nbins_num; n++) {
@@ -89,8 +89,8 @@ void fitting_dEdx() {
     for (int n = 0; n < nbins_num; n++) {
         distributions[n]->Scale(1,"width");
     }
-    TFile *outfile = new TFile("root_files/antiproton_fit.root","recreate");
-    gSystem->RedirectOutput("antiproton_UPCFitStatus.txt","w");
+    TFile *outfile = new TFile("root_files/antiproton_fit_p38_4.root","recreate");
+    gSystem->RedirectOutput("antiproton_p38_4_UPCFitStatus.txt","w");
         
         // ///////////////////////////////////Fitting ///////////////////////////////////
         // Fit parameters: (N, mean, Sigma, AlphaL, nL, AlphaH, nH) - defined in dscb function
@@ -138,7 +138,7 @@ void fitting_dEdx() {
     //initialize the histograms
     TH1D *kData[nbins_num*pbins_num];
     TH1D *protonData[nbins_num*pbins_num];
-    TH1I * totalProtons = new TH1I("totalAntiProtons","Proton count;N_{ch};p{+/-}",100,-1,4);
+    TH1D *totalantiprotons = new TH1D("totalantiprotons","Proton count;N_{ch};p{+/-}",1,-1,4);
 
     for (int n = 0; n < nbins_num; n++) {
         
@@ -222,8 +222,8 @@ void fitting_dEdx() {
         
         protonFit_fullrange[n]->SetParameters(protonFit[n]->GetParameter(0),protonFit[n]->GetParameter(01),protonFit[n]->GetParameter(02),protonFit[n]->GetParameter(03),protonFit[n]->GetParameter(04),protonFit[n]->GetParameter(05),protonFit[n]->GetParameter(06));
         int integral = abs(protonFit_fullrange[n]->Integral(-0.5,0)) + protonFit_fullrange[n]->Integral(0,4);
-        std::cout << "Number of antiprotons: " << integral << std::endl;
-        totalProtons->SetBinContent(n+1,integral);
+        std::cout << "Number of protons: " << integral << std::endl;
+        totalantiprotons->AddBinContent(n+1,integral);
 
         std::cout  << "Chi^2: " << protonFit[n]->GetChisquare() << "\n" << "NDF: " << protonFit[n]->GetNDF() << "\n" << "Chi^2/NDF: " << protonFit[n]->GetChisquare() / protonFit[n]->GetNDF()  << "\n" << std::endl;
         
@@ -236,7 +236,7 @@ void fitting_dEdx() {
         protonData[n]->Write();
         protonFit[n]->Write();
         protonFit_fullrange[n]->Write();
-        totalProtons->Write();
+        totalantiprotons->Write();
         outfile->Close();
     }
 }

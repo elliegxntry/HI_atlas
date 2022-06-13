@@ -24,6 +24,7 @@ void pT_dist_1Dhist() {
     for (int e = 0; e < tree->GetEntries(); e++){
         tree->GetEntry(e);
         for (int i = 0; i < trk_n; i++) {
+            if (pT[i] > 0.4) {continue;}
             pT->Fill(trk_pt[i]);
         }
     }
