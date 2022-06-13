@@ -30,7 +30,8 @@ void dEdx_protonfit_plot() {
     TF1* kaonFit_fullRange[nbins_number*pbins_number];
     TF1* protonFit[nbins_number*pbins_number];
     TF1* protonFit_fullRange[nbins_number*pbins_number];
-    for (int n = 0; n < nbins_number*pbins_number; n++){
+    for (int n = 0; n < nbins_number; n++){
+        for (int p = 0; p < pbins_number; n++) {
         //load total histogram data
         ostringstream histName;
         histName << "n" << n << "p0";// << p;
@@ -49,7 +50,7 @@ void dEdx_protonfit_plot() {
         
         //load the pion fit
         ostringstream pionFitStream;
-        pionFitStream << "pion_n" << n << "p0";// << p;
+        pionFitStream << "pion_n25_60_p" << p;
         pionFit[n] = (TF1*) file->Get(pionFitStream.str().c_str());
         pionFit_fullRange[n] = (TF1*) file->Get("pion_n0p0_fullrange");
         
@@ -64,6 +65,7 @@ void dEdx_protonfit_plot() {
         protonFitStream << "proton_n" << n << "p0";// << p;
         protonFit[n] = (TF1*) file->Get(protonFitStream.str().c_str());
         protonFit_fullRange[n] = (TF1*) file->Get("proton_n0p0_fullrange");
+        }
     }
     
     for (int n=0; n < nbins_number; n++) {

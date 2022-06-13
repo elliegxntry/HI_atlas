@@ -16,6 +16,7 @@ void pbar_over_p_1Dhist() {
     double etabins[etabin_num+1] = {-0.8,0.8};
     const int pbin_num = 5;
     double pbins[pbin_num+1] = {0.3,0.32,0.34,0.36,0.38,0.4};
+    string p_and_pbar[2] = {"proton","antiproton"};
     
     TLatex *latex = new TLatex;
     latex->SetNDC(kTRUE);
