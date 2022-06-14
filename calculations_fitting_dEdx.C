@@ -33,75 +33,34 @@ double dscb(double* x, double*par) {
     return N*result;
 }
 
-void fitting_dEdx() {
+void calculations_fitting_dEdx() {
     // ///////////////////////////////////Load in the data!///////////////////////////////////
     const int nbins_num = 1;
     const int pbins_num = 1;
-    //double nbins[nbins_num+1] = {25,30,35,40,45,50,55,60};
     double nbins[nbins_num+1] = {25,60};
     double pbins[pbins_num+1] = {0.3,0.4};//,0.5,0.6,0.7};//,0.8,0.9,1.0};
     
     string p_and_pbar[2] = {"proton", "antiproton"};
-    //TFile *outfile = new TFile("root_files/proton_antiproton.root","recreate");
-    for (int m = 0; m < 1; m++) {
+    for (int m = 0; m < 2; m++) {
         TH1D* distributions[nbins_num*pbins_num];
         TH1D* proton_histogram[nbins_num*pbins_num];
-        std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
         
-        for (int p = 0; p < pbins_num; p++) {
-            ostringstream histName;
-            histName << "n25_60_p" << p;
-            distributions[p] = new TH1D(histName.str().c_str(),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-1,4);
-            distributions[p]->Sumw2();
-        }
-        std::cout << "Reading file!" << std::endl;
-        
-        TFile *file = new TFile("root_files/slimmed_user.srdas.29054111.OUTPUT._0.root","READ");
-        if (file->IsZombie()){
-            std::cout << "Error opening file - skipping file!" << std::endl;
-        }
-        TTree *tree = (TTree*) file->Get("tree");
-
-        int trk_n;
-        int trk_400;
-        float trk_pt[10000];
-        float trk_eta[10000];
-        float trk_q[10000];
-        float dEdx[10000];
-        float gaps[4];
-        
-        tree->SetBranchAddress("trk_n", &trk_n);
-        tree->SetBranchAddress("trk_400", &trk_400);
-        tree->SetBranchAddress("trk_pt", trk_pt);
-        tree->SetBranchAddress("trk_eta", trk_eta);
-        tree->SetBranchAddress("trk_q", trk_q);
-        tree->SetBranchAddress("trk_dEdx", dEdx);
-        
-        int nevents = tree->GetEntries();
-        for (int e = 0; e < nevents; e++) {
-            if (e % 100000 == 0) std::cout << "Loading event " << e << std::endl;
-            tree->GetEntry(e);
-            for (int i=0; i < trk_n; i++){
-                if (abs(trk_eta[i]) > 0.8) {continue;}
-                double momentum = abs(trk_pt[i]*cosh(trk_eta[i]));
-                if ((m == 0) && (trk_q[i] < 0)) {continue;} //keep only protons
-                if ((m == 1) && (trk_q[i] > 0)) {continue;} //keep only antiprotons
-                for (int p = 0; p < pbins_num; p++) {
-                    if (nbins[0] < trk_400 && trk_400 <= nbins[1] && pbins[p] <= momentum && momentum < pbins[p+1]) {
-                        distributions[p]->Fill(log(dEdx[i]));
-                    }
-                }
-            }
-        }
-        file->Close();
-        for (int p = 0; p < pbins_num; p++) {
-            distributions[p]->Scale(1,"width");
-        }
+        ostringstream data_file_name;
+        data_file_name << "root_files/" << p_and_pbar[m] << "_data.root";
+        TFile *file = new TFile(data_file_name.str().c_str(),"read");
         ostringstream filename;
         filename << "root_files/" << p_and_pbar[m] << "_fit.root";
         TFile *outfile = new TFile(filename.str().c_str(),"recreate");
         ostringstream output_file_name;
         output_file_name << p_and_pbar[m] << "_UPCFitStatus.txt";
+        
+        for (int p = 0; p < pbins_num; p++) {
+            ostringstream histName;
+            histName << "n25_60_p" << p;
+            distributions[p] = (TH1D*) file->Get(histName.str().c_str());
+            //distributions[p]->Sumw2();
+        }
+
         //std::cout << output_file_name.str().c_str() << std::endl;
         //gSystem->RedirectOutput(output_file_name.str().c_str(),"w");
             
@@ -123,7 +82,7 @@ void fitting_dEdx() {
         const float kaonMean = 0.688;
         const float kaonSigma = 0.16;
         const float kaonAlphaL = 1.5;
-        const float kaonnL = 10;
+        const float kaonnL = 10;//////////////////////////////////
         const float kaonAlphaH = 1.1;
         const float kaonnH = 1000000;
         const float kaonLowLim = pionUpLim;
@@ -134,7 +93,7 @@ void fitting_dEdx() {
         const float protonMean = 1.5;
         const float protonSigma = .16;
         const float protonAlphaL = 1.2;
-        const float protonnL = 10;
+        const float protonnL = 10000;
         const float protonAlphaH = 1.2;
         const float protonnH = 1000000;
         const float protonLowLim = kaonUpLim;
@@ -153,7 +112,7 @@ void fitting_dEdx() {
         TH1D *protonData[nbins_num*pbins_num];
         ostringstream proton_histogram_name;
         proton_histogram_name << "total" << p_and_pbar[m] << "s";
-        proton_histogram[m] = new TH1D(proton_histogram_name.str().c_str(),"Proton count;N_{ch};p{+/-}",1,-1,4);
+        proton_histogram[m] = new TH1D(proton_histogram_name.str().c_str(),"Proton count;N_{ch};p{+/-}",1,-2,5);
 
         for (int p = 0; p < pbins_num; p++) {
             
@@ -164,7 +123,7 @@ void fitting_dEdx() {
             pionFit[p] = new TF1(pionFitName.str().c_str(), dscb, pionLowLim, pionUpLim,7.);
             ostringstream pionFit_fullrangeName;
             pionFit_fullrangeName << "pion_n25_60_p" << p << "_fullrange";
-            pionFit_fullrange[p] = new TF1(pionFit_fullrangeName.str().c_str(), dscb, -1,4,7.);
+            pionFit_fullrange[p] = new TF1(pionFit_fullrangeName.str().c_str(), dscb, -2,5,7.);
             pionFit[p]->SetParameters(pionN, pionMean, pionSigma, pionAlphaL, pionnL, pionAlphaH, pionnH);
 
             distributions[p]->Fit(pionFit[p],"RNLQ");
@@ -182,14 +141,15 @@ void fitting_dEdx() {
             kaonFit[p] = new TF1(kaonFitName.str().c_str(), dscb, kaonLowLim,kaonUpLim,7.);
             ostringstream kaonFit_fullrangeName;
             kaonFit_fullrangeName << "kaon_n25_60_p" << p << "_fullrange";
-            kaonFit_fullrange[p] = new TF1(kaonFit_fullrangeName.str().c_str(), dscb, -1,4,7.);
+            kaonFit_fullrange[p] = new TF1(kaonFit_fullrangeName.str().c_str(), dscb, -2,5,7.);
             kaonFit[p]->SetParameters(kaonN, kaonMean, kaonSigma, kaonAlphaL, kaonnL, kaonAlphaH, kaonnH);
-            kaonFit[p]->SetParLimits(4,0.1,10.1); //0.0001,1
+            kaonFit[p]->SetParLimits(4,0.1,10.1);
+            //kaonFit[p]->SetParLimits(6,0.1,1000.1);
             
             //subtract pion fit from the histogram:
             ostringstream kDataName;
             kDataName << "kaonData_n25_60_p" << p;
-            kData[p] = new TH1D(kDataName.str().c_str(),"",100,-1,4);
+            kData[p] = new TH1D(kDataName.str().c_str(),"",100,-2,5);
             for (int i = 0; i <= 100; i++) {
                 double hist = distributions[p]->GetBinContent(i);
                 double bin = distributions[p]->GetBinCenter(i);
@@ -213,16 +173,16 @@ void fitting_dEdx() {
             protonFitName << "proton_n25_60_p" << p;
             ostringstream protonFit_fullrangeName;
             protonFit_fullrangeName << "proton_n25_60_p" << p << "_fullrange";
-            protonFit_fullrange[p] = new TF1(protonFit_fullrangeName.str().c_str(), dscb, -1,4,7.);
+            protonFit_fullrange[p] = new TF1(protonFit_fullrangeName.str().c_str(), dscb, -2,5,7.);
             protonFit[p] = new TF1(protonFitName.str().c_str(), dscb, protonLowLim, protonUpLim, 7);
 
             protonFit[p]->SetParameters(protonN, protonMean, protonSigma, protonAlphaL, protonnL, protonAlphaH, protonnH);
-            protonFit[p]->SetParLimits(4,1.1,20.1);
+            protonFit[p]->SetParLimits(4,1000.1,100000.1);
             
             //subtract kaon and pion fit from histogram:
             ostringstream pDataName;
             pDataName << "protonData_n25_60_p" << p;
-            protonData[p] = new TH1D(pDataName.str().c_str(),"",100,-1,4);
+            protonData[p] = new TH1D(pDataName.str().c_str(),"",100,-2,5);
             for (int i = 0; i <= 100; i++) {
                 double hist = kData[p] ->GetBinContent(i);
                 double bin = kData[p]->GetBinCenter(i);
@@ -259,3 +219,4 @@ void fitting_dEdx() {
         }//p loop
     }//m loop
 }
+

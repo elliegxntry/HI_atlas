@@ -20,7 +20,7 @@ void dEdx_protonfit_plot() {
     TLatex *latex = new TLatex();
     latex->SetNDC(kTRUE);
 
-    TFile *file = new TFile("root_files/antiproton_fit.root","read");
+    TFile *file = new TFile("root_files/proton_fit.root","read");
     TH1D* myhist[nbins_number*pbins_number];
     TH1D* kaonData[nbins_number*pbins_number];
     TH1D* protonData[nbins_number*pbins_number];
@@ -43,7 +43,7 @@ void dEdx_protonfit_plot() {
         
         //load pion and kaon subtracted data
         ostringstream protondatastream;
-        protondatastream << "proton_n25_60_p" << p;
+        protondatastream << "protonData_n25_60_p" << p;
         protonData[p] = (TH1D*) file->Get(protondatastream.str().c_str());
         
         
@@ -141,9 +141,11 @@ void dEdx_protonfit_plot() {
         legend->AddEntry(protonFit_fullRange[p], "Extended Proton Fit","l");
         legend->Draw("same");
         
-        latex->DrawLatex(0.7,0.65,"#scale[0.8]{ATLAS #bf{Internal}}");
-        latex->DrawLatex(0.7,0.60,"#scale[0.6]{#bf{0nXn 5.02 TeV Pb+Pb}}");
-        //latex->DrawLatex(0.7,0.55,"#scale[0.6]{#bf{0.3 < p < 0.4}}");
-        tc->SaveAs(Form("dEdx_histograms/antiproton_n25_60_p%d.pdf",p));
+        latex->DrawLatex(0.68,0.65,"#scale[0.8]{ATLAS #bf{Internal}}");
+        latex->DrawLatex(0.68,0.60,"#scale[0.6]{#bf{0nXn 5.02 TeV Pb+Pb}}");
+        latex->DrawLatex(0.68,0.55,"#scale[0.6]{#bf{0.3 < p < 0.4}}");
+        latex->DrawLatex(0.68,0.5,"#scale[0.6]{#bf{-0.8 < #eta < 0.8}}");
+        latex->DrawLatex(0.68,0.45,"#scale[0.6]{#bf{25 < N_{ch} < 60}}");
+        tc->SaveAs(Form("dEdx_histograms/proton_n25_60_p%d.pdf",p));
     }
 }
