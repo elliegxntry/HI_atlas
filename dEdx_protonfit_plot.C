@@ -30,116 +30,120 @@ void dEdx_protonfit_plot() {
     TF1* kaonFit_fullRange[nbins_number*pbins_number];
     TF1* protonFit[nbins_number*pbins_number];
     TF1* protonFit_fullRange[nbins_number*pbins_number];
-    for (int n = 0; n < nbins_number; n++){
-        for (int p = 0; p < pbins_number; n++) {
+    for (int p = 0; p < pbins_number; p++) {
         //load total histogram data
         ostringstream histName;
-        histName << "n" << n << "p0";// << p;
-        myhist[n] = (TH1D*) file->Get(histName.str().c_str());
+        histName << "n25_60_p" << p;
+        myhist[p] = (TH1D*) file->Get(histName.str().c_str());
 
         //load pion subtracted data
         ostringstream kaondatastream;
-        kaondatastream << "kaonData_n" << n << "p0";// << p;
-        kaonData[n] = (TH1D*) file->Get(kaondatastream.str().c_str());
+        kaondatastream << "kaonData_n25_60_p" << p;
+        kaonData[p] = (TH1D*) file->Get(kaondatastream.str().c_str());
         
         //load pion and kaon subtracted data
         ostringstream protondatastream;
-        protondatastream << "protonData_n" << n << "p0";// << p;
-        protonData[n] = (TH1D*) file->Get(protondatastream.str().c_str());
+        protondatastream << "proton_n25_60_p" << p;
+        protonData[p] = (TH1D*) file->Get(protondatastream.str().c_str());
         
         
         //load the pion fit
         ostringstream pionFitStream;
         pionFitStream << "pion_n25_60_p" << p;
-        pionFit[n] = (TF1*) file->Get(pionFitStream.str().c_str());
-        pionFit_fullRange[n] = (TF1*) file->Get("pion_n0p0_fullrange");
+        pionFit[p] = (TF1*) file->Get(pionFitStream.str().c_str());
+        ostringstream pionFit_fullrangeName;
+        pionFit_fullrangeName << "pion_n25_60_p" << p << "_fullrange";
+        pionFit_fullRange[p] = (TF1*) file->Get(pionFit_fullrangeName.str().c_str());
         
         //load the kaon fit
         ostringstream kaonFitStream;
-        kaonFitStream << "kaon_n" << n << "p0";// << p;
-        kaonFit[n] = (TF1*) file->Get(kaonFitStream.str().c_str());
-        kaonFit_fullRange[n] = (TF1*) file->Get("kaon_n0p0_fullrange");
+        kaonFitStream << "kaon_n25_60_p" << p;
+        kaonFit[p] = (TF1*) file->Get(kaonFitStream.str().c_str());
+        ostringstream kaonFit_fullrangeName;
+        kaonFit_fullrangeName << "kaon_n25_60_p" << p << "_fullrange";
+        kaonFit_fullRange[p] = (TF1*) file->Get(kaonFit_fullrangeName.str().c_str());
         
         //load the proton fit
         ostringstream protonFitStream;
-        protonFitStream << "proton_n" << n << "p0";// << p;
-        protonFit[n] = (TF1*) file->Get(protonFitStream.str().c_str());
-        protonFit_fullRange[n] = (TF1*) file->Get("proton_n0p0_fullrange");
-        }
+        protonFitStream << "proton_n25_60_p" << p;
+        protonFit[p] = (TF1*) file->Get(protonFitStream.str().c_str());
+        ostringstream protonFit_fullrangeName;
+        protonFit_fullrangeName << "proton_n25_60_p" << p << "_fullrange";
+        protonFit_fullRange[p] = (TF1*) file->Get(protonFit_fullrangeName.str().c_str());
     }
     
-    for (int n=0; n < nbins_number; n++) {
+    for (int p = 0; p < pbins_number; p++) {
         //plot the total histogram
-        myhist[n]->SetLineWidth(2);
-        myhist[n]->SetLineColor(kBlack);
-        myhist[n]->Draw();
+        myhist[p]->SetLineWidth(2);
+        myhist[p]->SetLineColor(kBlack);
+        myhist[p]->Draw();
         
 
         // plot the histogram with the pion fit subtracted
-        kaonData[n]->SetLineWidth(2);
-        kaonData[n]->SetLineColor(kBlue);
-        kaonData[n]->Draw("same");
+        kaonData[p]->SetLineWidth(2);
+        kaonData[p]->SetLineColor(kBlue);
+        kaonData[p]->Draw("same");
         
 
         //plot the histogram with the pion and kaon fits subtracted
-        protonData[n]->SetLineWidth(2);
-        protonData[n]->SetLineColor(kMagenta+1);
-        protonData[n]->Draw("same");
+        protonData[p]->SetLineWidth(2);
+        protonData[p]->SetLineColor(kMagenta+1);
+        protonData[p]->Draw("same");
         
         //plot the fits:
          
         //plot the pion fit
-        pionFit_fullRange[n]->SetLineWidth(2);
-        pionFit_fullRange[n]->SetLineColor(kPink-1);
-        pionFit_fullRange[n]->SetLineStyle(3);
-        pionFit_fullRange[n]->Draw("same");
+        pionFit_fullRange[p]->SetLineWidth(2);
+        pionFit_fullRange[p]->SetLineColor(kPink-1);
+        pionFit_fullRange[p]->SetLineStyle(3);
+        pionFit_fullRange[p]->Draw("same");
         
-        pionFit[n]->SetLineWidth(2);
-        pionFit[n]->SetLineColor(kRed);
-        pionFit[n]->SetLineStyle(kDashed);
-        pionFit[n]->Draw("same");
+        pionFit[p]->SetLineWidth(2);
+        pionFit[p]->SetLineColor(kRed);
+        pionFit[p]->SetLineStyle(kDashed);
+        pionFit[p]->Draw("same");
         
         
 
         //plot the kaon fit
-        kaonFit_fullRange[n]->SetLineWidth(2);
-        kaonFit_fullRange[n]->SetLineColor(kOrange-4);
-        kaonFit_fullRange[n]->SetLineStyle(3);
-        kaonFit_fullRange[n]->Draw("same");
-        kaonFit[n]->SetLineWidth(2);
-        kaonFit[n]->SetLineColor(kOrange-3);
-        kaonFit[n]->SetLineStyle(kDashed);
-        kaonFit[n]->Draw("same");
+        kaonFit_fullRange[p]->SetLineWidth(2);
+        kaonFit_fullRange[p]->SetLineColor(kOrange-4);
+        kaonFit_fullRange[p]->SetLineStyle(3);
+        kaonFit_fullRange[p]->Draw("same");
+        kaonFit[p]->SetLineWidth(2);
+        kaonFit[p]->SetLineColor(kOrange-3);
+        kaonFit[p]->SetLineStyle(kDashed);
+        kaonFit[p]->Draw("same");
         
 
         //plot the proton fit
-        protonFit_fullRange[n]->SetLineWidth(2);
-        protonFit_fullRange[n]->SetLineStyle(3);
-        protonFit_fullRange[n]->SetLineColor(kGreen-7);
-        protonFit_fullRange[n]->Draw("same");
-        protonFit[n]->SetLineWidth(2);
-        protonFit[n]->SetLineColor(kGreen-3);
-        protonFit[n]->SetLineStyle(kDashed);
-        protonFit[n]->Draw("same");
+        protonFit_fullRange[p]->SetLineWidth(2);
+        protonFit_fullRange[p]->SetLineStyle(3);
+        protonFit_fullRange[p]->SetLineColor(kGreen-7);
+        protonFit_fullRange[p]->Draw("same");
+        protonFit[p]->SetLineWidth(2);
+        protonFit[p]->SetLineColor(kGreen-3);
+        protonFit[p]->SetLineStyle(kDashed);
+        protonFit[p]->Draw("same");
         
         // build the legend
         TLegend *legend = new TLegend(0.7,0.7,0.9,0.9);
         gStyle->SetLegendBorderSize(1);
-        legend->AddEntry(myhist[n], "Data","l");
-        legend->AddEntry(kaonData[n], "Pion subtracted data", "l");
-        legend->AddEntry(protonData[n], "Pion and Kaon subtracted data", "l");
+        legend->AddEntry(myhist[p], "Data","l");
+        legend->AddEntry(kaonData[p], "Pion subtracted data", "l");
+        legend->AddEntry(protonData[p], "Pion and Kaon subtracted data", "l");
         
-        legend->AddEntry(pionFit[n], "Pion Fit","l");
-        legend->AddEntry(pionFit_fullRange[n], "Extended pion Fit", "l");
-        legend->AddEntry(kaonFit[n], "Kaon Fit","l");
-        legend->AddEntry(kaonFit_fullRange[n],"Extended Kaon Fit","l");
-        legend->AddEntry(protonFit[n],"Proton Fit","l");
-        legend->AddEntry(protonFit_fullRange[n], "Extended Proton Fit","l");
+        legend->AddEntry(pionFit[p], "Pion Fit","l");
+        legend->AddEntry(pionFit_fullRange[p], "Extended pion Fit", "l");
+        legend->AddEntry(kaonFit[p], "Kaon Fit","l");
+        legend->AddEntry(kaonFit_fullRange[p],"Extended Kaon Fit","l");
+        legend->AddEntry(protonFit[p],"Proton Fit","l");
+        legend->AddEntry(protonFit_fullRange[p], "Extended Proton Fit","l");
         legend->Draw("same");
         
         latex->DrawLatex(0.7,0.65,"#scale[0.8]{ATLAS #bf{Internal}}");
         latex->DrawLatex(0.7,0.60,"#scale[0.6]{#bf{0nXn 5.02 TeV Pb+Pb}}");
-        latex->DrawLatex(0.7,0.55,"#scale[0.6]{#bf{0.3 < p < 0.4}}");
-        tc->SaveAs(Form("dEdx_histograms/antiproton_n%d_p0.pdf",n));
+        //latex->DrawLatex(0.7,0.55,"#scale[0.6]{#bf{0.3 < p < 0.4}}");
+        tc->SaveAs(Form("dEdx_histograms/antiproton_n25_60_p%d.pdf",p));
     }
 }

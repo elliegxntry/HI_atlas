@@ -99,8 +99,8 @@ void fitting_dEdx() {
         TFile *outfile = new TFile(filename.str().c_str(),"recreate");
         ostringstream output_file_name;
         output_file_name << p_and_pbar[m] << "_UPCFitStatus.txt";
-        std::cout << output_file_name.str().c_str() << std::endl;
-        gSystem->RedirectOutput(output_file_name.str().c_str(),"w");
+        //std::cout << output_file_name.str().c_str() << std::endl;
+        //gSystem->RedirectOutput(output_file_name.str().c_str(),"w");
             
             // ///////////////////////////////////Fitting ///////////////////////////////////
             // Fit parameters: (N, mean, Sigma, AlphaL, nL, AlphaH, nH) - defined in dscb function
@@ -120,7 +120,7 @@ void fitting_dEdx() {
         const float kaonMean = 0.688;
         const float kaonSigma = 0.16;
         const float kaonAlphaL = 1.5;
-        const float kaonnL = 1.2;
+        const float kaonnL = .465;
         const float kaonAlphaH = 1.1;
         const float kaonnH = 1000000;
         const float kaonLowLim = pionUpLim;
@@ -161,7 +161,7 @@ void fitting_dEdx() {
             pionFit[p] = new TF1(pionFitName.str().c_str(), dscb, pionLowLim, pionUpLim,7.);
             ostringstream pionFit_fullrangeName;
             pionFit_fullrangeName << "pion_n25_60_p" << p << "_fullrange";
-            pionFit_fullrange[p] = new TF1("pion_n0p0_fullrange", dscb, -1,4,7.);
+            pionFit_fullrange[p] = new TF1(pionFit_fullrangeName.str().c_str(), dscb, -1,4,7.);
             pionFit[p]->SetParameters(pionN, pionMean, pionSigma, pionAlphaL, pionnL, pionAlphaH, pionnH);
 
             distributions[p]->Fit(pionFit[p],"RNLQ");
@@ -179,9 +179,9 @@ void fitting_dEdx() {
             kaonFit[p] = new TF1(kaonFitName.str().c_str(), dscb, kaonLowLim,kaonUpLim,7.);
             ostringstream kaonFit_fullrangeName;
             kaonFit_fullrangeName << "kaon_n25_60_p" << p << "_fullrange";
-            kaonFit_fullrange[p] = new TF1("kaon_n0p0_fullrange", dscb, -1,4,7.);
+            kaonFit_fullrange[p] = new TF1(kaonFit_fullrangeName.str().c_str(), dscb, -1,4,7.);
             kaonFit[p]->SetParameters(kaonN, kaonMean, kaonSigma, kaonAlphaL, kaonnL, kaonAlphaH, kaonnH);
-            kaonFit[p]->SetParLimits(4,0,10);
+            kaonFit[p]->SetParLimits(4,0.001,1);
             
             //subtract pion fit from the histogram:
             ostringstream kDataName;
@@ -200,6 +200,8 @@ void fitting_dEdx() {
             kData[p]->Fit(kaonFit[p],"RNL");
             
             kaonFit_fullrange[p]->SetParameters(kaonFit[p]->GetParameter(0),kaonFit[p]->GetParameter(01),kaonFit[p]->GetParameter(02),kaonFit[p]->GetParameter(03),kaonFit[p]->GetParameter(04),kaonFit[p]->GetParameter(05),kaonFit[p]->GetParameter(06));
+            int integral_kaons = abs(kaonFit_fullrange[p]->Integral(-0.5,0)) + kaonFit_fullrange[p]->Integral(0,4);
+            std::cout << "Number of kaons: " << integral_kaons << std::endl;
 
             std::cout  << "Chi^2: " << kaonFit[p]->GetChisquare() << "\n" << "NDF: " << kaonFit[p]->GetNDF() << "\n" << "Chi^2/NDF: " << kaonFit[p]->GetChisquare() / kaonFit[p]->GetNDF()  << "\n" << std::endl;
             
@@ -208,7 +210,7 @@ void fitting_dEdx() {
             protonFitName << "proton_n25_60_p" << p;
             ostringstream protonFit_fullrangeName;
             protonFit_fullrangeName << "proton_n25_60_p" << p << "_fullrange";
-            protonFit_fullrange[p] = new TF1("proton_n0p0_fullrange", dscb, -1,4,7.);
+            protonFit_fullrange[p] = new TF1(protonFit_fullrangeName.str().c_str(), dscb, -1,4,7.);
             protonFit[p] = new TF1(protonFitName.str().c_str(), dscb, protonLowLim, protonUpLim, 7);
 
             protonFit[p]->SetParameters(protonN, protonMean, protonSigma, protonAlphaL, protonnL, protonAlphaH, protonnH);
