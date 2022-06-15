@@ -90,7 +90,7 @@ void pbar_over_p_1Dhist() {
     graph->SetTitle("Ratio of antiprotons to protons vs momentum;Momentum [GeV];pbar/p");
     latex->DrawLatex(0.7,0.65,"#scale[0.8]{ATLAS #bf{Internal}}");
     latex->DrawLatex(0.7,0.60,"#scale[0.6]{#bf{0nXn 5.02 TeV Pb+Pb}}");
-    latex->DrawLatex(0.7,0.55,"#scale[0.6]{#bf{0.3 < p < 0.4}}");
+    latex->DrawLatex(0.7,0.55,"#scale[0.6]{#bf{-0.8 < #eta < 0.8}}");
     graph->Draw("AP*");
     graph->SaveAs("pbar_p.pdf");
 }

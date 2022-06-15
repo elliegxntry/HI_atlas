@@ -41,7 +41,7 @@ void calculations_fitting_dEdx() {
     double pbins[pbins_num+1] = {0.3,0.4};//,0.5,0.6,0.7};//,0.8,0.9,1.0};
     
     string p_and_pbar[2] = {"proton", "antiproton"};
-    for (int m = 0; m < 2; m++) {
+    for (int m = 1; m < 2; m++) {
         TH1D* distributions[nbins_num*pbins_num];
         TH1D* proton_histogram[nbins_num*pbins_num];
         
@@ -67,6 +67,17 @@ void calculations_fitting_dEdx() {
             // ///////////////////////////////////Fitting ///////////////////////////////////
             // Fit parameters: (N, mean, Sigma, AlphaL, nL, AlphaH, nH) - defined in dscb function
         // set the parameters of the fit - aka first guesses!
+        /*const float pionN = 770000;
+        const float pionMean = -0.19;
+        const float pionSigma = 0.18;
+        const float pionAlphaL = 1.2;
+        const float pionnL = 1000000;
+        const float pionAlphaH = 1.1;
+        const float pionnH = 100000;
+        const float pionLowLim = -0.7;
+        const float pionUpLim = 0.35;
+        */
+        
         const float pionN = 770000;
         const float pionMean = -0.19;
         const float pionSigma = 0.18;
@@ -126,9 +137,9 @@ void calculations_fitting_dEdx() {
             pionFit_fullrange[p] = new TF1(pionFit_fullrangeName.str().c_str(), dscb, -2,5,7.);
             pionFit[p]->SetParameters(pionN, pionMean, pionSigma, pionAlphaL, pionnL, pionAlphaH, pionnH);
 
-            distributions[p]->Fit(pionFit[p],"RNLQ");
-            distributions[p]->Fit(pionFit[p],"RNLQ");
-            distributions[p]->Fit(pionFit[p],"RNLQ");
+            //distributions[p]->Fit(pionFit[p],"RNLQ");
+            //distributions[p]->Fit(pionFit[p],"RNLQ");
+            //distributions[p]->Fit(pionFit[p],"RNLQ");
             distributions[p]->Fit(pionFit[p],"RNL");
             
             pionFit_fullrange[p]->SetParameters(pionFit[p]->GetParameter(0),pionFit[p]->GetParameter(1),pionFit[p]->GetParameter(2),pionFit[p]->GetParameter(3),pionFit[p]->GetParameter(4),pionFit[p]->GetParameter(5),pionFit[p]->GetParameter(6));

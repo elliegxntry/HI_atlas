@@ -12,7 +12,7 @@ void histogram_fitting_dEdx() {
     double pbins[pbins_num+1] = {0.3,0.4};//,0.5,0.6,0.7};//,0.8,0.9,1.0};
     
     string p_and_pbar[2] = {"proton", "antiproton"};
-    for (int m = 1; m < 2; m++) {
+    for (int m = 0; m < 2; m++) {
         TH1D* distributions[nbins_num*pbins_num];
         std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
         
@@ -46,8 +46,8 @@ void histogram_fitting_dEdx() {
             for (int i=0; i < trk_n; i++){
                 if (abs(trk_eta[i]) > 0.8) {continue;}
                 double momentum = abs(trk_pt[i]*cosh(trk_eta[i]));
-                if ((m == 0) && (trk_q[i] < 0)) {continue;} //keep only protons
-                if ((m == 1) && (trk_q[i] > 0)) {continue;} //keep only antiprotons
+                if (m == 0 && (trk_q[i] < 0)) {continue;} //keep only protons
+                if (m == 1 && (trk_q[i] > 0)) {continue;} //keep only antiprotons
                 for (int p = 0; p < pbins_num; p++) {
                     if (nbins[0] < trk_400 && trk_400 <= nbins[1] && pbins[p] <= momentum && momentum < pbins[p+1]) {
                         distributions[p]->Fill(log(dEdx[i]));
