@@ -43,7 +43,7 @@ void fitting_dEdx() {
     
     string p_and_pbar[2] = {"proton", "antiproton"};
     //TFile *outfile = new TFile("root_files/proton_antiproton.root","recreate");
-    for (int m = 0; m < 1; m++) {
+    for (int m = 1; m < 2; m++) {
         TH1D* distributions[nbins_num*pbins_num];
         TH1D* proton_histogram[nbins_num*pbins_num];
         std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
@@ -134,7 +134,7 @@ void fitting_dEdx() {
         const float protonMean = 1.5;
         const float protonSigma = .16;
         const float protonAlphaL = 1.2;
-        const float protonnL = 10;
+        const float protonnL = 10000;
         const float protonAlphaH = 1.2;
         const float protonnH = 1000000;
         const float protonLowLim = kaonUpLim;
@@ -239,7 +239,7 @@ void fitting_dEdx() {
             protonFit_fullrange[p]->SetParameters(protonFit[p]->GetParameter(0),protonFit[p]->GetParameter(01),protonFit[p]->GetParameter(02),protonFit[p]->GetParameter(03),protonFit[p]->GetParameter(04),protonFit[p]->GetParameter(05),protonFit[p]->GetParameter(06));
             int integral = abs(protonFit_fullrange[p]->Integral(-0.5,0)) + protonFit_fullrange[p]->Integral(0,4);
             std::cout << "Number of " << p_and_pbar[m] << "s: " << integral << std::endl;
-            proton_histogram[p]->AddBinContent(p+1,integral);
+            proton_histogram[m]->AddBinContent(p+1,integral);
 
             std::cout  << "Chi^2: " << protonFit[p]->GetChisquare() << "\n" << "NDF: " << protonFit[p]->GetNDF() << "\n" << "Chi^2/NDF: " << protonFit[p]->GetChisquare() / protonFit[p]->GetNDF()  << "\n" << std::endl;
             
@@ -252,10 +252,10 @@ void fitting_dEdx() {
             protonData[p]->Write();
             protonFit[p]->Write();
             protonFit_fullrange[p]->Write();
-            proton_histogram[p]->Write();
+            proton_histogram[m]->Write();
             outfile->Close();
             distributions[p] = nullptr;
-            proton_histogram[p] = nullptr;
+            proton_histogram[m] = nullptr;
         }//p loop
     }//m loop
 }

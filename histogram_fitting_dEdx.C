@@ -12,12 +12,13 @@ void histogram_fitting_dEdx() {
     double pbins[pbins_num+1] = {0.3,0.4};//,0.5,0.6,0.7};//,0.8,0.9,1.0};
     
     string p_and_pbar[2] = {"proton", "antiproton"};
-    for (int m = 0; m < 2; m++) {
+    for (int m = 1; m < 2; m++) {
         TH1D* distributions[nbins_num*pbins_num];
         std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
         
         for (int p = 0; p < pbins_num; p++) {
-            distributions[p] = new TH1D(Form("n25_60_p%d",p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
+            //distributions[p] = new TH1D(Form("n25_60_p%d",p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
+            distributions[p] = new TH1D("n25_60_p0",";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
         }
         std::cout << "Reading file!" << std::endl;
         

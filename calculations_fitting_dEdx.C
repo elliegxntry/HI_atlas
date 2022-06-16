@@ -67,16 +67,6 @@ void calculations_fitting_dEdx() {
             // ///////////////////////////////////Fitting ///////////////////////////////////
             // Fit parameters: (N, mean, Sigma, AlphaL, nL, AlphaH, nH) - defined in dscb function
         // set the parameters of the fit - aka first guesses!
-        /*const float pionN = 770000;
-        const float pionMean = -0.19;
-        const float pionSigma = 0.18;
-        const float pionAlphaL = 1.2;
-        const float pionnL = 1000000;
-        const float pionAlphaH = 1.1;
-        const float pionnH = 100000;
-        const float pionLowLim = -0.7;
-        const float pionUpLim = 0.35;
-        */
         
         const float pionN = 770000;
         const float pionMean = -0.19;
@@ -87,29 +77,29 @@ void calculations_fitting_dEdx() {
         const float pionnH = 100000;
         const float pionLowLim = -0.7;
         const float pionUpLim = 0.35;
-        
-        //Set the parameters of the fit - initial guesses
-        const float kaonN = 18000;
-        const float kaonMean = 0.688;
-        const float kaonSigma = 0.16;
-        const float kaonAlphaL = 1.5;
-        const float kaonnL = 10;//////////////////////////////////
-        const float kaonAlphaH = 1.1;
-        const float kaonnH = 1000000;
-        const float kaonLowLim = pionUpLim;
-        const float kaonUpLim = 1.15;
-        
-        //Set the parameters of the fit - initial guesses:
-        const float protonN = 10000;
-        const float protonMean = 1.5;
-        const float protonSigma = .16;
-        const float protonAlphaL = 1.2;
-        const float protonnL = 10000;
-        const float protonAlphaH = 1.2;
-        const float protonnH = 1000000;
-        const float protonLowLim = kaonUpLim;
-        const float protonUpLim = 2.1;
-        
+         
+         //Set the parameters of the fit - initial guesses
+         const float kaonN = 18000;
+         const float kaonMean = 0.688;
+         const float kaonSigma = 0.16;
+         const float kaonAlphaL = 1.5;
+         const float kaonnL = 10;//////////////////////////////////
+         const float kaonAlphaH = 1.1;
+         const float kaonnH = 1000000;
+         const float kaonLowLim = pionUpLim;
+         const float kaonUpLim = 1.15;
+         
+         //Set the parameters of the fit - initial guesses:
+         const float protonN = 10000;
+         const float protonMean = 1.5;
+         const float protonSigma = .16;
+         const float protonAlphaL = 1.2;
+         const float protonnL = 10000;
+         const float protonAlphaH = 1.2;
+         const float protonnH = 1000000;
+         const float protonLowLim = kaonUpLim;
+         const float protonUpLim = 2.1;
+        ca
         //initialize the fit functions
         TF1* pionFit[nbins_num*pbins_num];
         TF1* pionFit_fullrange[nbins_num*pbins_num];
@@ -123,10 +113,10 @@ void calculations_fitting_dEdx() {
         TH1D *protonData[nbins_num*pbins_num];
         ostringstream proton_histogram_name;
         proton_histogram_name << "total" << p_and_pbar[m] << "s";
-        proton_histogram[m] = new TH1D(proton_histogram_name.str().c_str(),"Proton count;N_{ch};p{+/-}",1,-2,5);
 
         for (int p = 0; p < pbins_num; p++) {
             
+            proton_histogram[p] = new TH1D(proton_histogram_name.str().c_str(),"Proton count;N_{ch};p{+/-}",1,-2,5);
             std::cout << "starting analysis" << std::endl;
             // pions - note: the "1000000"s are the power law, so it's just arbitrarily big
             ostringstream pionFitName;
@@ -136,10 +126,10 @@ void calculations_fitting_dEdx() {
             pionFit_fullrangeName << "pion_n25_60_p" << p << "_fullrange";
             pionFit_fullrange[p] = new TF1(pionFit_fullrangeName.str().c_str(), dscb, -2,5,7.);
             pionFit[p]->SetParameters(pionN, pionMean, pionSigma, pionAlphaL, pionnL, pionAlphaH, pionnH);
-
+            
             //distributions[p]->Fit(pionFit[p],"RNLQ");
             //distributions[p]->Fit(pionFit[p],"RNLQ");
-            //distributions[p]->Fit(pionFit[p],"RNLQ");
+            distributions[p]->Fit(pionFit[p],"RNLQ");
             distributions[p]->Fit(pionFit[p],"RNL");
             
             pionFit_fullrange[p]->SetParameters(pionFit[p]->GetParameter(0),pionFit[p]->GetParameter(1),pionFit[p]->GetParameter(2),pionFit[p]->GetParameter(3),pionFit[p]->GetParameter(4),pionFit[p]->GetParameter(5),pionFit[p]->GetParameter(6));

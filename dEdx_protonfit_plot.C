@@ -19,8 +19,9 @@ void dEdx_protonfit_plot() {
     
     TLatex *latex = new TLatex();
     latex->SetNDC(kTRUE);
-
-    TFile *file = new TFile("root_files/proton_fit.root","read");
+    
+    TFile *data_file = new TFile("root_files/antiproton_data.root","read");
+    TFile *file = new TFile("root_files/antiproton_fit.root","read");
     TH1D* myhist[nbins_number*pbins_number];
     TH1D* kaonData[nbins_number*pbins_number];
     TH1D* protonData[nbins_number*pbins_number];
@@ -34,7 +35,8 @@ void dEdx_protonfit_plot() {
         //load total histogram data
         ostringstream histName;
         histName << "n25_60_p" << p;
-        myhist[p] = (TH1D*) file->Get(histName.str().c_str());
+//        myhist[p] = (TH1D*) file->Get(histName.str().c_str());
+        myhist[p] = (TH1D*) data_file->Get("n25_60_p0");
 
         //load pion subtracted data
         ostringstream kaondatastream;
@@ -146,6 +148,6 @@ void dEdx_protonfit_plot() {
         latex->DrawLatex(0.68,0.55,"#scale[0.6]{#bf{0.3 < p < 0.4}}");
         latex->DrawLatex(0.68,0.5,"#scale[0.6]{#bf{-0.8 < #eta < 0.8}}");
         latex->DrawLatex(0.68,0.45,"#scale[0.6]{#bf{25 < N_{ch} < 60}}");
-        tc->SaveAs(Form("dEdx_histograms/proton_n25_60_p%d.pdf",p));
+        tc->SaveAs(Form("dEdx_histograms/antiproton_n25_60_p%d.pdf",p));
     }
 }
