@@ -12,16 +12,15 @@ void histogram_fitting_dEdx() {
     double pbins[pbins_num+1] = {0.3,0.32,0.34,0.36,0.38,0.4,0.42,0.44,0.46,0.48,0.5,0.52,0.54,0.56,0.58,0.6};
     
     string p_and_pbar[2] = {"proton", "antiproton"};
+    TFile *outfile = new TFile("root_files/data.root","recreate");
     for (int m = 0; m < 2; m++) {
         TH1D* distributions[nbins_num*pbins_num];
         std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
-        
-        TFile *outfile = new TFile("root_files/data.root","recreate");
-        
+                
         for (int p = 0; p < pbins_num; p++) {
             ostringstream histName;
             histName << p_and_pbar[m] << "_n25_60_p" << p;
-            distributions[p] = new TH1D(histName.str().c_str(),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
+            distributions[p] = new TH1D(Form("%s_n25_60_p%d", p_and_pbar[m].c_str(), p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
         }
         std::cout << "Reading file!" << std::endl;
         
@@ -70,6 +69,6 @@ void histogram_fitting_dEdx() {
             distributions[p]->Write();
             distributions[p] = nullptr;
         }
-        outfile->Close();
     }//m loop
+    outfile->Close();
 }
