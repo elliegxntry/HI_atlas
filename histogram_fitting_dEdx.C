@@ -7,18 +7,21 @@
 void histogram_fitting_dEdx() {
     // ///////////////////////////////////Load in the data!///////////////////////////////////
     const int nbins_num = 1;
-    const int pbins_num = 1;
+    const int pbins_num = 15;
     double nbins[nbins_num+1] = {25,60};
-    double pbins[pbins_num+1] = {0.3,0.4};//,0.5,0.6,0.7};//,0.8,0.9,1.0};
+    double pbins[pbins_num+1] = {0.3,0.32,0.34,0.36,0.38,0.4,0.42,0.44,0.46,0.48,0.5,0.52,0.54,0.56,0.58,0.6};
     
     string p_and_pbar[2] = {"proton", "antiproton"};
-    for (int m = 1; m < 2; m++) {
+    for (int m = 0; m < 2; m++) {
         TH1D* distributions[nbins_num*pbins_num];
         std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
         
+        TFile *outfile = new TFile("root_files/data.root","recreate");
+        
         for (int p = 0; p < pbins_num; p++) {
-            //distributions[p] = new TH1D(Form("n25_60_p%d",p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
-            distributions[p] = new TH1D("n25_60_p0",";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
+            ostringstream histName;
+            histName << p_and_pbar[m] << "_n25_60_p" << p;
+            distributions[p] = new TH1D(histName.str().c_str(),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
         }
         std::cout << "Reading file!" << std::endl;
         
@@ -27,6 +30,7 @@ void histogram_fitting_dEdx() {
 
         int trk_n;
         int trk_400;
+        float eta_sign;
         float trk_pt[10000];
         float trk_eta[10000];
         float trk_q[10000];
@@ -35,18 +39,21 @@ void histogram_fitting_dEdx() {
         
         tree->SetBranchAddress("trk_n", &trk_n);
         tree->SetBranchAddress("trk_400", &trk_400);
+        tree->SetBranchAddress("eta_sign", &eta_sign);
         tree->SetBranchAddress("trk_pt", trk_pt);
         tree->SetBranchAddress("trk_eta", trk_eta);
         tree->SetBranchAddress("trk_q", trk_q);
         tree->SetBranchAddress("trk_dEdx", dEdx);
         
         int nevents = tree->GetEntries();
+        //int nevents = 10000;
         for (int e = 0; e < nevents; e++) {
-            if (e % 50000 == 0) std::cout << "Loading event " << e << std::endl;
+            if (e % 100000 == 0) std::cout << "Loading event " << e << std::endl;
             tree->GetEntry(e);
             for (int i=0; i < trk_n; i++){
-                if (abs(trk_eta[i]) > 0.8) {continue;}
-                double momentum = abs(trk_pt[i]*cosh(trk_eta[i]));
+                float eta = eta_sign*trk_eta[i];
+                if (abs(eta) > 0.8) {continue;}
+                double momentum = abs(trk_pt[i]*cosh(eta));
                 if (m == 0 && (trk_q[i] < 0)) {continue;} //keep only protons
                 if (m == 1 && (trk_q[i] > 0)) {continue;} //keep only antiprotons
                 for (int p = 0; p < pbins_num; p++) {
@@ -57,16 +64,12 @@ void histogram_fitting_dEdx() {
             }
         }
         file->Close();
+        outfile->cd();
         for (int p = 0; p < pbins_num; p++) {
             distributions[p]->Scale(1,"width");
-        }
-        ostringstream filename;
-        filename << "root_files/" << p_and_pbar[m] << "_data.root";
-        TFile *outfile = new TFile(filename.str().c_str(),"recreate");
-        for (int p = 0; p < pbins_num; p++) {
             distributions[p]->Write();
-            outfile->Close();
             distributions[p] = nullptr;
         }
+        outfile->Close();
     }//m loop
 }
