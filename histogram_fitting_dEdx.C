@@ -18,8 +18,6 @@ void histogram_fitting_dEdx() {
         std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
                 
         for (int p = 0; p < pbins_num; p++) {
-            ostringstream histName;
-            histName << p_and_pbar[m] << "_n25_60_p" << p;
             distributions[p] = new TH1D(Form("%s_n25_60_p%d", p_and_pbar[m].c_str(), p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,5);
         }
         std::cout << "Reading file!" << std::endl;
