@@ -32,7 +32,7 @@ void dEdx_updated_cuts() {
     vector<float> *trk_eta = nullptr;
     vector<float> *trk_q = nullptr;
     vector<float> *dEdx = nullptr;
-    vector<float> *trk_nhits_dEdx = nullptr;
+    vector<int> *trk_nhits_dEdx = nullptr;
     vector<float> *trk_quality1 = nullptr;
 
     tree->SetBranchAddress("trk_n", &trk_n);
@@ -52,7 +52,7 @@ void dEdx_updated_cuts() {
             float eta = trk_eta->at(i);
             if (TMath::Abs(eta) > 0.3) {continue;} //restrict to -0.3 < eta < 0.3
             double momentum = TMath::Abs(trk_pt->at(i)*TMath::CosH(trk_eta->at(i)));
-            if (trk_nhits_dEdx->at(i) < 3 && trk_nhits_dEdx->at(i) > 3) {continue;} // keep only the nhits = 3
+            if (trk_nhits_dEdx->at(i)!=3) {continue;} // keep only the nhits = 3
             if (trk_quality1->at(i) == 0) {continue;} // limit to trk_quality1c == true
             for (int p = 0; p < pbins_num; p++) {
                 if (pbins[p] <= momentum && momentum < pbins[p+1]) {
