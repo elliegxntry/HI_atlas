@@ -10,27 +10,16 @@
 #include "TPad.h"
 
 double bethe_bloch_function(double* p, double*par) {
-    double m_part_c = par[0];
-    double na = par[1]; // 1/mol
-    double re =par[2]; // cm
-    double me_csquared = par[3]; // MeV
-    double z = par[4];
-    double big_Z = par[5];
-    double a = par[6];
-    double tMax = par[7];
-    double i = par[8];
+    double m_part_c = 1;
+    double l = par[0];
+    double n = par[1];
+    double r = par[2];
     
-    
-    double k = 4*TMath::Pi()*na*TMath::Power(re,2)*me_csquared;
-    double l = -k*TMath::Power(z,2)*big_Z/a;
-    double n = 2*me_csquared*tMax*TMath::Power(i,-2);
-    double dEdx = 0;
     double beta_gamma = p[0]/m_part_c;
     double beta_squared = TMath::Power(beta_gamma,2)/(1+TMath::Power(beta_gamma,2));
-    //double TMax_guess = (2*me_csquared*TMath::Power(beta_gamma, 2))/(1 + 2*TMath::Power(TMath::Power(beta_gamma, 2)/beta_squared, 0.5));
-    //cout << TMax_guess << endl;
     
-    dEdx = l/beta_squared*(0.5*TMath::Log(n*TMath::Power(beta_gamma,2))-beta_squared);//-0.5*delta);
+    double dEdx = 0;
+    dEdx = -(l/beta_squared)*(0.5*TMath::Log(n*TMath::Power(beta_gamma,2))-beta_squared)+r;
     return dEdx;
 }
 
@@ -80,10 +69,16 @@ void bethe_bloch() {
             
             // fill histograms with pion peaks
             if (m == 0) {
-                positivePionPeaks->SetBinContent(p+1,TMath::Power(TMath::E(), pionFit[p]->GetParameter(1)));
+                double mu = pionFit[p]->GetParameter(1);
+                double delta = pionFit[p]->GetParError(1);
+                positivePionPeaks->SetBinContent(p+1,exp(mu));
+                positivePionPeaks->SetBinError(p+1,TMath::Abs(exp(mu+delta)-exp(mu)));
             }
             else {
-                negativePionPeaks->SetBinContent(p+1,TMath::Power(TMath::E(),pionFit[p]->GetParameter(1)));
+                double mu = pionFit[p]->GetParameter(1);
+                double delta = pionFit[p]->GetParError(1);
+                negativePionPeaks->SetBinContent(p+1,exp(mu));
+                negativePionPeaks->SetBinError(p+1,TMath::Abs(exp(mu+delta)-exp(mu)));
             }
         }
     }
@@ -93,15 +88,18 @@ void bethe_bloch() {
     gStyle->SetOptStat(0);
     gPad->SetTicks();
     gPad->SetLogy(0);
+    gStyle->SetErrorX(0);
     TLatex *latex = new TLatex();
     latex->SetNDC(kTRUE);
     
-    positivePionPeaks->SetMarkerStyle(3);
+    positivePionPeaks->SetMarkerStyle(7);
     positivePionPeaks->SetMarkerColor(kRed);
+    positivePionPeaks->SetLineColor(kRed);
     positivePionPeaks->SetMinimum(0.87);
     positivePionPeaks->Draw("P");
-    negativePionPeaks->SetMarkerStyle(3);
+    negativePionPeaks->SetMarkerStyle(7);
     negativePionPeaks->SetMarkerColor(kBlue);
+    negativePionPeaks->SetLineColor(kBlue);
     negativePionPeaks->Draw("same P");
     positivePionPeaks->SetTitle("dE/dx pion maximum for various momentums");
     positivePionPeaks->SetXTitle("Momentum [GeV/c]");
@@ -119,24 +117,87 @@ void bethe_bloch() {
     
     //fit the peaks to the BB function - for both the positive and negative functions ------------------------
     // guesses for the fit parameters:
-    const float m_part_c = 139.5; //MeV/c
-    const float na = TMath::Na(); //1/mol
-    const float re = 2.817940326e-13; // cm
-    const float me_csquared = 0.510998918; // MeV
-    const float z = 1; // no units
-    const float big_Z = 14; // no units
-    const float a = 28.0855; //g/mol
-    const float tMax = 1e-5; //MeV
-    const float i = 1; //MeV
+    const float l = 0.0464;
+    const float n = 11;
+    const float r = 0.93;
     
-    positiveBBFit = new TF1("positiveBBFit", bethe_bloch_function, 0.3, 1.2,9.);
-    positiveBBFit->SetParameters(m_part_c, na, re, me_csquared, z, big_Z, a, tMax, i);
-    positiveBBFit->SetParLimits(0,m_part_c-0.1,m_part_c + 0.1);
-    positiveBBFit->FixParameter(1,na);
-//    positiveBBFit->SetParLimits(7,1e-6,1e-3);
-//    positiveBBFit->SetParLimits(8,1e-6,1e2);
-    
-    positivePionPeaks->Fit(positiveBBFit, "RNL");
-    
+    double *p = 0;
+    // fit the positive data  ----------------------------------------------
+    positiveBBFit = new TF1("positiveBBFit", bethe_bloch_function, 0.3, 1.2,3.);
+    positiveBBFit->SetParameters(l,n,r);
+    positiveBBFit->SetParLimits(0,0.04,0.05);
+    positiveBBFit->SetParLimits(1,9,13);
+    positiveBBFit->SetParLimits(2,0.9,1);
+    positivePionPeaks->Fit(positiveBBFit, "RNQ");
+    positivePionPeaks->Fit(positiveBBFit, "RNQ");
+    positivePionPeaks->Fit(positiveBBFit, "RNQ");
+    positivePionPeaks->Fit(positiveBBFit, "RN");
+
     cout << "Chi^2: " << positiveBBFit->GetChisquare() << "\n NDF: " << positiveBBFit->GetNDF() << "\n Chi^2/NDF: " << positiveBBFit->GetChisquare()/positiveBBFit->GetNDF() << endl;
+
+    //Plot the positive fit to the BB function
+    TCanvas *tc_bb_p = new TCanvas();
+    tc_bb_p->cd();
+    gStyle->SetOptStat(0);
+    gPad->SetTicks();
+    gPad->SetLogy(0);
+    TLatex *bbLatex = new TLatex();
+    bbLatex->SetNDC(kTRUE);
+    
+    positiveBBFit->SetLineWidth(2);
+    positiveBBFit->SetLineColor(kRed);
+    positiveBBFit->Draw("");
+    positivePionPeaks->SetMarkerStyle(3);
+    positivePionPeaks->SetMarkerColor(kBlack);
+    positivePionPeaks->Draw("same P");
+    
+    positiveBBFit->SetTitle("dE/dx pion maximum for various momentums;Momentum [GeV/c];dE/dx [MeV g^{-1} cm^{2}])");
+    bbLatex->DrawLatex(0.68,0.66,"#scale[0.6]{#bf{5.02 TeV p+Pb}}");
+    bbLatex->DrawLatex(0.68,0.7,"#scale[0.8]{ATLAS #bf{Internal}}");
+    bbLatex->DrawLatex(0.68,0.62,"#scale[0.6]{#bf{-0.3 < #eta < 0.3}}");
+    TLegend *legend_p = new TLegend(0.6,0.8,0.9,0.9);
+    legend_p->AddEntry(positivePionPeaks, "Positive Pions", "P");
+    legend_p->AddEntry(positiveBBFit, "Fit to BB function", "l");
+    gStyle->SetLegendBorderSize(1);
+    legend_p->Draw("same");
+    
+    tc_bb_p->SaveAs("dEdx_histograms/bbFit_positive_pions.pdf");
+    
+    // fit the negative data  ----------------------------------------------
+    negativeBBFit = new TF1("negativeBBFit", bethe_bloch_function, 0.3, 1.2,3.);
+    negativeBBFit->SetParameters(l,n,r);
+    negativeBBFit->SetParLimits(0,0.04,0.07);
+    negativeBBFit->SetParLimits(1,9,13);
+    negativeBBFit->SetParLimits(2,0.9,1);
+    negativePionPeaks->Fit(negativeBBFit, "RNQ");
+    negativePionPeaks->Fit(negativeBBFit, "RNQ");
+    negativePionPeaks->Fit(negativeBBFit, "RNQ");
+    negativePionPeaks->Fit(negativeBBFit, "RN");
+
+    cout << "Chi^2: " << negativeBBFit->GetChisquare() << "\n NDF: " << negativeBBFit->GetNDF() << "\n Chi^2/NDF: " << negativeBBFit->GetChisquare()/negativeBBFit->GetNDF() << endl;
+    
+    //Plot the negative fit to the BB function
+    TCanvas *tc_bb_n = new TCanvas();
+    tc_bb_n->cd();
+    gStyle->SetOptStat(0);
+    gPad->SetTicks();
+    gPad->SetLogy(0);
+    negativeBBFit->SetLineWidth(2);
+    negativeBBFit->SetLineColor(kBlue);
+    negativeBBFit->Draw("");
+    negativePionPeaks->SetMarkerStyle(3);
+    negativePionPeaks->SetMarkerColor(kBlack);
+    negativePionPeaks->Draw("same P");
+    
+    negativeBBFit->SetTitle("dE/dx pion maximum for various momentums;Momentum [GeV/c];dE/dx [MeV g^{-1} cm^{2}])");
+    bbLatex->DrawLatex(0.68,0.66,"#scale[0.6]{#bf{5.02 TeV p+Pb}}");
+    bbLatex->DrawLatex(0.68,0.7,"#scale[0.8]{ATLAS #bf{Internal}}");
+    bbLatex->DrawLatex(0.68,0.62,"#scale[0.6]{#bf{-0.3 < #eta < 0.3}}");
+    TLegend *legend_n = new TLegend(0.6,0.8,0.9,0.9);
+    legend_n->AddEntry(negativePionPeaks, "Negative Pions", "P");
+    legend_n->AddEntry(negativeBBFit, "Fit to BB function", "l");
+    gStyle->SetLegendBorderSize(1);
+    legend_n->Draw("same");
+    
+    tc_bb_n->SaveAs("dEdx_histograms/bbFit_negative_pions.pdf");
 }
