@@ -189,7 +189,7 @@ void bethe_bloch() {
     negativePionPeaks->SetMarkerColor(kBlack);
     negativePionPeaks->Draw("same P");
     
-    negativeBBFit->SetTitle("dE/dx pion maximum for various momentums;Momentum [GeV/c];dE/dx [MeV g^{-1} cm^{2}])");
+    negativeBBFit->SetTitle("dE/dx pion maximum for various momentums;Momentum [GeV/c]/Mc;dE/dx [MeV g^{-1} cm^{2}])");
     bbLatex->DrawLatex(0.68,0.66,"#scale[0.6]{#bf{5.02 TeV p+Pb}}");
     bbLatex->DrawLatex(0.68,0.7,"#scale[0.8]{ATLAS #bf{Internal}}");
     bbLatex->DrawLatex(0.68,0.62,"#scale[0.6]{#bf{-0.3 < #eta < 0.3}}");
