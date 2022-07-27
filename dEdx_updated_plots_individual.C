@@ -9,9 +9,9 @@
 #include "TH1F.h"
 
 void dEdx_updated_plots_individual() {
-    const int pbins_num = 9;
-    double pbins[pbins_num+1] = {0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2};
-    string p_and_pbar[2] = {"proton", "antiproton"};
+    const int pbins_num = 8;
+    double pbins[pbins_num+1] = {0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2};
+    string p_and_pbar[2] = {"positive", "negative"};
     
     TFile *file = new TFile("root_files/pPb_data.root","read");
     TH1D* distributions[2*pbins_num];
@@ -31,7 +31,7 @@ void dEdx_updated_plots_individual() {
         TH1D* distributions[2*pbins_num];
 
         for (int p = 0; p < pbins_num; p++){
-            distributions[p] = (TH1D*) file->Get(Form("%ss_p%d", p_and_pbar[m].c_str(), p));
+            distributions[p] = (TH1D*) file->Get(Form("%s_p%d", p_and_pbar[m].c_str(), p));
             distributions[p]->SetLineWidth(2);
             distributions[p]->SetLineColor(kBlack);
             distributions[p]->Draw();
@@ -44,7 +44,7 @@ void dEdx_updated_plots_individual() {
             particle_type << "#scale[0.6]{#bf{" <<  p_and_pbar[m] << "s}}";
             latex_data->DrawLatex(0.68,0.55,"#scale[0.6]{#bf{-0.3 < #eta < 0.3}}");
             latex_data->DrawLatex(0.68,0.5, particle_type.str().c_str());
-            //tc_data->SaveAs(Form("dEdx_histograms/just_data/m%d_p%d.pdf",m,p));
+            tc_data->SaveAs(Form("dEdx_histograms/just_data/m%d_p%d.pdf",m,p));
         }
     }
     
@@ -89,8 +89,8 @@ void dEdx_updated_plots_individual() {
         gPad->SetLogy();
         
         TFile *file = new TFile("root_files/pPb_data.root","read");
-        protons[p] = (TH1D*) file->Get(Form("protons_p%d",p));
-        antiprotons[p] = (TH1D*) file->Get(Form("antiprotons_p%d",p));
+        protons[p] = (TH1D*) file->Get(Form("positive_p%d",p));
+        antiprotons[p] = (TH1D*) file->Get(Form("negative_p%d",p));
         
         //draw the distributions overlayed
         protons[p]->SetLineWidth(2);
@@ -127,7 +127,7 @@ void dEdx_updated_plots_individual() {
         //pads[1]->Clear();
         gPad->SetTicks(1);
         gPad->SetLogy(0);
-        ratio[p] = (TH1D*) antiprotons[p]->Clone(Form("antiprotons_%d",p));
+        ratio[p] = (TH1D*) antiprotons[p]->Clone(Form("negative_%d",p));
         ratio[p]->Divide(protons[p]);
         ratio[p]->SetLineWidth(2);
         ratio[p]->SetLineColor(kBlack);

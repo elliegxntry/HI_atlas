@@ -6,19 +6,19 @@
 #include "TMath.h"
 
 void dEdx_updated_cuts() {
-    // ///////////////////////////////////Load in the data!///////////////////////////////////
-    const int pbins_num = 9;
-    double pbins[pbins_num+1] = {0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2};
+    const int pbins_num = 8;
+    double pbins[pbins_num+1] = {0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2};
     
-    string p_and_pbar[2] = {"proton", "antiproton"};
+    string p_and_pbar[2] = {"positive", "negative"};
     TFile *outfile = new TFile("root_files/pPb_data.root","recreate");
     TH1D* protons[2*pbins_num];
     TH1D* antiprotons[2*pbins_num];
-    //std::cout << "Loading " << p_and_pbar[m] << "s!" << std::endl;
+    float xshift[pbins_num+1] = {-0.102858, -0.11343, -0.1139, -0.100269, -0.0970618, -0.099067, -0.101021, -0.0971758};
+//    float xshift[pbins_num+1] = {0,0,0,0,0,0,0,0};
             
     for (int p = 0; p < pbins_num; p++) {
-        protons[p] = new TH1D(Form("protons_p%d", p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,3);
-        antiprotons[p] = new TH1D(Form("antiprotons_p%d", p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,3);
+        protons[p] = new TH1D(Form("positive_p%d", p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,3);
+        antiprotons[p] = new TH1D(Form("negative_p%d", p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,3);
 
     }
     std::cout << "Reading file!" << std::endl;
@@ -57,10 +57,10 @@ void dEdx_updated_cuts() {
             for (int p = 0; p < pbins_num; p++) {
                 if (pbins[p] <= momentum && momentum < pbins[p+1]) {
                     if (trk_q->at(i) > 0) {
-                        protons[p]->Fill(TMath::Log(dEdx->at(i)));
+                        protons[p]->Fill(TMath::Log(dEdx->at(i) - xshift[p]));
                     }
                     else {
-                        antiprotons[p]->Fill(TMath::Log(dEdx->at(i)));
+                        antiprotons[p]->Fill(TMath::Log(dEdx->at(i) - xshift[p]));
                     }
                 }
             }
