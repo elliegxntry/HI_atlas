@@ -24,41 +24,55 @@ double bethe_bloch_function(double* p, double*par) {
 }
 
 void data_mc_comparison() {
+    
     const int pbins_num = 8;
     double pbins[pbins_num+1] = {0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2};
     string p_and_pbar[2] = {"positive", "negative"};
     
     TFile *data_file = new TFile("root_files/pPb_data.root","read");
     TFile *mc_file = new TFile("root_files/gammaPb_dpmjet.root","read");
+    TFile *scaled = new TFile("root_files/scaling_factors.root", "recreate");
     
     TH1D* data_distribution[pbins_num];
     TH1D* mc_distribution[pbins_num];
+    TH1D* pions[pbins_num];
+    TH1D* kaons[pbins_num];
+    TH1D* protons[pbins_num];
     TF1* data_pionFit[pbins_num];
     TF1* mc_pionFit[pbins_num];
     TH1D* mc_distribution_new[pbins_num];
     TH1D* ratio[pbins_num];
     
     double difference[pbins_num] = {};
-    
-    for (int m = 0; m < 1; m++) {
+    double y_scale_m0[pbins_num+1] = {6.98579, 7.55825, 8.25687, 9.13616, 11.8121, 12.5909, 13.6024, 14.2701};
+    double y_scale_m1[pbins_num+1] = {6.96112, 7.26236, 8.23275, 9.24009, 10.4656, 12.349, 13.6092, 14.8219};
+
+    for (int m = 0; m < 2; m++) {
         double data_low_fit[pbins_num] = {-0.48,-0.45,-0.5,-0.55,-0.55,-0.55,-0.5,-0.5};
         double data_high_fit[pbins_num] = {0.22,0.18,0.15,0.2,0.25,0.2,0.15,0.15};
         double mc_low_fit[pbins_num] = {-0.2,-0.2,-0.2,-0.2,-0.25,-0.25,-0.2,-0.2};
         double mc_high_fit[pbins_num] = {0.35,0.28,0.25,0.3,0.35,0.35,0.35,0.3};
         float data_shift[pbins_num] = {-0.102858, -0.11343, -0.1139, -0.100269, -0.0970618, -0.099067, -0.101021, -0.0971758};
-        float mc_shift[pbins_num] = {0.107718, 0.0918337, 0.0816148, 0.100812, 0.106426, 0.11712, 0.106271, 0.10289};
+        float mc_shift[pbins_num+1] = {0.108957, 0.0909291, 0.0816315, 0.0975523, 0.104969, 0.107637, 0.110375, 0.101998};
         
         for (int p = 0; p < pbins_num; p++) {
+            
             data_distribution[p] = (TH1D*) data_file->Get(Form("%s_p%d", p_and_pbar[m].c_str(), p));
-            mc_distribution[p] = (TH1D*) mc_file->Get(Form("%s_p%d", p_and_pbar[m].c_str(), p));
-            data_pionFit[p] = new TF1(Form("%s_p%d", p_and_pbar[m].c_str(), p), "gaus",data_low_fit[p] - data_shift[p], data_high_fit[p] - data_shift[p]);
-            mc_pionFit[p] = new TF1(Form("%s_p%d", p_and_pbar[m].c_str(), p), "gaus",mc_low_fit[p] - mc_shift[p], mc_high_fit[p] - mc_shift[p]);
+            pions[p] = (TH1D*) scaled->Get(Form("pions_m%d_p%d", m, p));
+            kaons[p] = (TH1D*) scaled->Get(Form("kaons_m%d_p%d", m, p));
+            protons[p] = (TH1D*) scaled->Get(Form("protons_m%d_p%d", m, p));
+            mc_distribution[p] = (TH1D*) scaled->Get(Form("%s_p%d", p_and_pbar[m].c_str(), p));
+            
+            data_pionFit[p] = new TF1(Form("%s_p%d", p_and_pbar[m].c_str(), p), "gaus", data_low_fit[p] - data_shift[p], data_high_fit[p] - data_shift[p]);
+            mc_pionFit[p] = new TF1(Form("%s_p%d", p_and_pbar[m].c_str(), p), "gaus", mc_low_fit[p] - mc_shift[p], mc_high_fit[p] - mc_shift[p]);
+            
             data_distribution[p]->Fit(data_pionFit[p],"RNLQ");
+//            pions[p]->Fit(mc_pionFit[p], "RNLQ");
             mc_distribution[p]->Fit(mc_pionFit[p],"RNLQ");
+            
             difference[p] = data_pionFit[p]->GetParameter(1) - mc_pionFit[p]->GetParameter(1);
-//            cout << "Data peak: " << data_pionFit[p]->GetParameter(1) << ", MC peak: " << mc_pionFit[p]->GetParameter(1) << ", Difference: " << difference[p] << "\n";
-//            cout << data_pionFit[p]->GetParameter(1) << ", ";
-//            cout << difference[p] << ", ";
+            cout << mc_pionFit[p]->GetParameter(1) << ", ";
+            
             TCanvas *tc = new TCanvas("tc","New Canvas",50,50,700,600);
             double padSplit = 0.32;
             double leftMargin = 0.07;
@@ -110,12 +124,15 @@ void data_mc_comparison() {
             mc_distribution[p]->SetMarkerStyle(3);
             mc_distribution[p]->SetMarkerColor(kBlue);
             mc_distribution[p]->SetLineColor(kBlue);
-//            gStyle->SetTitleY(1.02);
+//            pions[p]->SetMaximum(2e6);
+//            pions[p]->SetMarkerStyle(3);
+//            pions[p]->SetMarkerColor(kBlue);
+//            pions[p]->SetLineColor(kBlue);
             legend->AddEntry(mc_distribution[p], "DPMJET Data", "P");
             mc_distribution[p]->Draw();
+//            pions[p]->Draw();
             data_distribution[p]->Draw("same");
             
-//            latex->DrawLatex(0.45, 1, "#scale[0.8]{#bf{dE/distribution}}");
             latex->DrawLatex(0.78,0.76,"#scale[0.8]{ATLAS #bf{Internal}}");
             latex->DrawLatex(0.78,0.72,"#scale[0.6]{#bf{5.02 TeV p+Pb}}");
             latex->DrawLatex(0.78,0.68,"#scale[0.6]{#bf{DPMJET}}");
@@ -126,6 +143,13 @@ void data_mc_comparison() {
             ostringstream particle;
             particle <<"#scale[0.6]{#bf{" << p_and_pbar[m] << "}}";
             latex->DrawLatex(0.78,0.56, particle.str().c_str());
+            
+            ostringstream equation;
+            if (m == 0) {
+                equation << "#scale[0.6]{#bf{DPMJET = (original - " << mc_shift[p] <<  ")#times" << y_scale_m0[p] << "}}";}
+            else {
+                equation << "#scale[0.6]{#bf{DPMJET = (original - " << mc_shift[p] <<  ") * " << y_scale_m1[p] << "}}";}
+            latex->DrawLatex(0.65, 0.52, equation.str().c_str());
             legend->Draw("same");
             tc->cd();
             pads[1] = new TPad("pad1","",0.0,0.0,1.0,padSplit);
@@ -134,13 +158,11 @@ void data_mc_comparison() {
             pads[1]->SetLeftMargin(leftMargin);
             pads[1]->SetBottomMargin(bottomMargin);
 
-            //tc->cd();
             pads[1]->Draw("same");
             pads[1]->cd();
             tc->cd();
             
             pads[1]->cd();
-            //pads[1]->Clear();
             gPad->SetTicks(1);
             gPad->SetLogy(0);
             ratio[p] = (TH1D*) data_distribution[p]->Clone(Form("%s_p%d", p_and_pbar[m].c_str(), p));

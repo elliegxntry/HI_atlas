@@ -7,14 +7,13 @@
 
 void dEdx_updated_cuts() {
     const int pbins_num = 8;
-    double pbins[pbins_num+1] = {0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2};
+    double pbins[pbins_num+1] = {.4,.5,.6,.7,.8,.9,1.,1.1,1.2};
     
     string p_and_pbar[2] = {"positive", "negative"};
     TFile *outfile = new TFile("root_files/pPb_data.root","recreate");
     TH1D* protons[2*pbins_num];
     TH1D* antiprotons[2*pbins_num];
-    float xshift[pbins_num+1] = {-0.102858, -0.11343, -0.1139, -0.100269, -0.0970618, -0.099067, -0.101021, -0.0971758};
-//    float xshift[pbins_num+1] = {0,0,0,0,0,0,0,0};
+    float xshift[pbins_num+1] = {-0.102858, -0.11343, -0.1139, -0.100269, -0.0970618, -0.099067, -0.101021, -0.0971758}; //dont u dare try to "fix" this again it's a waste of time and you're fine
             
     for (int p = 0; p < pbins_num; p++) {
         protons[p] = new TH1D(Form("positive_p%d", p),";ln(dE/dx [MeV g^{-1} cm^{-1}]);dN^{trk} / d(ln(dE/dx))",100,-2,3);

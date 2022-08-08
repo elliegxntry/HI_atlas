@@ -141,6 +141,8 @@ void dpmjet_updated_plots() {
         //draw the distributions overlayed
         positive[p]->SetLineWidth(2);
         positive[p]->SetLineColor(kRed);
+        positive[p]->SetMaximum(3e4);
+        positive[p]->SetMinimum(10);
         positive[p]->Draw();
         negative[p]->SetLineWidth(2);
         negative[p]->SetLineColor(kBlue);

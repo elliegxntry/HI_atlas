@@ -118,8 +118,6 @@ void bethe_bloch() {
     legend->Draw("same");
     tc_pm->SaveAs("dEdx_histograms/momentum_vs_maxPion_dEdx.pdf");
     
-    //fit the peaks to the BB function - for both the positive and negative functions ------------------------
-    // guesses for the fit parameters:
     const float l = 0.0464;
     const float n = 11;
     const float r = 0.93;

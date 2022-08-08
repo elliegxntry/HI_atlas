@@ -30,7 +30,7 @@ void dpmjet_bethe_bloch() {
     string p_and_pbar[2] = {"positive", "negative"};
     
     //load data and initialize histograms/functions
-    TFile *file = new TFile("root_files/gammaPb_dpmjet_data.root","read");
+    TFile *file = new TFile("root_files/gammaPb_dpmjet.root","read");
     TH1D* distributions[2*pbins_num];
     TF1* pionFit[pbins_num];
     TH1D* positivePionPeaks = new TH1D("positivePionPeaks", "", pbins_num, pbins);
@@ -42,7 +42,8 @@ void dpmjet_bethe_bloch() {
         //define limits for gaussian fit based on data -------------------------------------------
         double low_fit[pbins_num] = {-0.2,-0.2,-0.2,-0.2,-0.25,-0.25,-0.2,-0.2};
         double high_fit[pbins_num] = {0.35,0.28,0.25,0.3,0.35,0.35,0.35,0.3};
-        double shift[pbins_num+1] = {0.0794111, 0.074114, 0.0897506, 0.0966575, 0.0965281, 0.099657, 0.0944564};
+//        double shift[pbins_num+1] = {0.0794111, 0.074114, 0.0897506, 0.0966575, 0.0965281, 0.099657, 0.0944564};
+        double shift[pbins_num+1] = {0,0,0,0,0,0,0,0};
         
         for (int p = 0; p < pbins_num; p++) {
             //get data from root file and actually do the fit
